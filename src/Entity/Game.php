@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\GameRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
@@ -16,20 +18,30 @@ class Game
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $picture = null;
 
     #[ORM\Column]
     private ?bool $isPublic = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $achievements = null;
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'gamesPlayed')]
+    private Collection $players;
 
-    #[ORM\Column(length: 255)]
-    private ?string $category = null;
+    #[ORM\OneToMany(mappedBy: 'gameID', targetEntity: Score::class)]
+    private Collection $scores;
+
+    #[ORM\OneToMany(mappedBy: 'gameID', targetEntity: Achievement::class)]
+    private Collection $achievements;
+
+    public function __construct()
+    {
+        $this->players = new ArrayCollection();
+        $this->scores = new ArrayCollection();
+        $this->achievements = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -53,7 +65,7 @@ class Game
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
 
@@ -65,7 +77,7 @@ class Game
         return $this->picture;
     }
 
-    public function setPicture(string $picture): static
+    public function setPicture(?string $picture): static
     {
         $this->picture = $picture;
 
@@ -84,26 +96,89 @@ class Game
         return $this;
     }
 
-    public function getAchievements(): ?string
+    /**
+     * @return Collection<int, User>
+     */
+    public function getPlayers(): Collection
     {
-        return $this->achievements;
+        return $this->players;
     }
 
-    public function setAchievements(string $achievements): static
+    public function addPlayer(User $player): static
     {
-        $this->achievements = $achievements;
+        if (!$this->players->contains($player)) {
+            $this->players->add($player);
+            $player->addGamesPlayed($this);
+        }
 
         return $this;
     }
 
-    public function getCategory(): ?string
+    public function removePlayer(User $player): static
     {
-        return $this->category;
+        if ($this->players->removeElement($player)) {
+            $player->removeGamesPlayed($this);
+        }
+
+        return $this;
     }
 
-    public function setCategory(string $category): static
+    /**
+     * @return Collection<int, Score>
+     */
+    public function getScores(): Collection
     {
-        $this->category = $category;
+        return $this->scores;
+    }
+
+    public function addScore(Score $score): static
+    {
+        if (!$this->scores->contains($score)) {
+            $this->scores->add($score);
+            $score->setGameID($this);
+        }
+
+        return $this;
+    }
+
+    public function removeScore(Score $score): static
+    {
+        if ($this->scores->removeElement($score)) {
+            // set the owning side to null (unless already changed)
+            if ($score->getGameID() === $this) {
+                $score->setGameID(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Achievement>
+     */
+    public function getAchievements(): Collection
+    {
+        return $this->achievements;
+    }
+
+    public function addAchievement(Achievement $achievement): static
+    {
+        if (!$this->achievements->contains($achievement)) {
+            $this->achievements->add($achievement);
+            $achievement->setGameID($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAchievement(Achievement $achievement): static
+    {
+        if ($this->achievements->removeElement($achievement)) {
+            // set the owning side to null (unless already changed)
+            if ($achievement->getGameID() === $this) {
+                $achievement->setGameID(null);
+            }
+        }
 
         return $this;
     }

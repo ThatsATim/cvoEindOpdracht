@@ -3,12 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -29,22 +31,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $email = null;
-
-    #[ORM\Column(length: 255)]
     private ?string $gender = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $birthday = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $birthday = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $picture = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $achievements = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $gamesPlayed = null;
 
     #[ORM\Column]
     private ?bool $isBanned = null;
@@ -56,7 +49,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?bool $isMuted = null;
 
     #[ORM\Column]
-    private ?bool $isFriendInviteBLocked = null;
+    private ?bool $isFriendInviteBlocked = null;
+
+    #[ORM\ManyToMany(targetEntity: Game::class, inversedBy: 'players')]
+    private Collection $gamesPlayed;
+
+    #[ORM\OneToMany(mappedBy: 'playerID', targetEntity: Score::class)]
+    private Collection $scores;
+
+    #[ORM\OneToMany(mappedBy: 'userA', targetEntity: Message::class)]
+    private Collection $messages;
+
+    #[ORM\OneToMany(mappedBy: 'userA', targetEntity: Friend::class)]
+    private Collection $friends;
+
+    #[ORM\ManyToMany(targetEntity: Achievement::class, mappedBy: 'playerID')]
+    private Collection $achievements;
+
+    public function __construct()
+    {
+        $this->gamesPlayed = new ArrayCollection();
+        $this->scores = new ArrayCollection();
+        $this->messages = new ArrayCollection();
+        $this->friends = new ArrayCollection();
+        $this->achievements = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -128,18 +145,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): static
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
     public function getGender(): ?string
     {
         return $this->gender;
@@ -152,12 +157,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getBirthday(): ?string
+    public function getBirthday(): ?\DateTimeInterface
     {
         return $this->birthday;
     }
 
-    public function setBirthday(string $birthday): static
+    public function setBirthday(?\DateTimeInterface $birthday): static
     {
         $this->birthday = $birthday;
 
@@ -169,33 +174,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->picture;
     }
 
-    public function setPicture(string $picture): static
+    public function setPicture(?string $picture): static
     {
         $this->picture = $picture;
-
-        return $this;
-    }
-
-    public function getAchievements(): ?string
-    {
-        return $this->achievements;
-    }
-
-    public function setAchievements(string $achievements): static
-    {
-        $this->achievements = $achievements;
-
-        return $this;
-    }
-
-    public function getGamesPlayed(): ?string
-    {
-        return $this->gamesPlayed;
-    }
-
-    public function setGamesPlayed(string $gamesPlayed): static
-    {
-        $this->gamesPlayed = $gamesPlayed;
 
         return $this;
     }
@@ -236,14 +217,155 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function isIsFriendInviteBLocked(): ?bool
+    public function isIsFriendInviteBlocked(): ?bool
     {
-        return $this->isFriendInviteBLocked;
+        return $this->isFriendInviteBlocked;
     }
 
-    public function setIsFriendInviteBLocked(bool $isFriendInviteBLocked): static
+    public function setIsFriendInviteBlocked(bool $isFriendInviteBlocked): static
     {
-        $this->isFriendInviteBLocked = $isFriendInviteBLocked;
+        $this->isFriendInviteBlocked = $isFriendInviteBlocked;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Game>
+     */
+    public function getGamesPlayed(): Collection
+    {
+        return $this->gamesPlayed;
+    }
+
+    public function addGamesPlayed(Game $gamesPlayed): static
+    {
+        if (!$this->gamesPlayed->contains($gamesPlayed)) {
+            $this->gamesPlayed->add($gamesPlayed);
+        }
+
+        return $this;
+    }
+
+    public function removeGamesPlayed(Game $gamesPlayed): static
+    {
+        $this->gamesPlayed->removeElement($gamesPlayed);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Score>
+     */
+    public function getScores(): Collection
+    {
+        return $this->scores;
+    }
+
+    public function addScore(Score $score): static
+    {
+        if (!$this->scores->contains($score)) {
+            $this->scores->add($score);
+            $score->setPlayerID($this);
+        }
+
+        return $this;
+    }
+
+    public function removeScore(Score $score): static
+    {
+        if ($this->scores->removeElement($score)) {
+            // set the owning side to null (unless already changed)
+            if ($score->getPlayerID() === $this) {
+                $score->setPlayerID(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Message>
+     */
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(Message $message): static
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages->add($message);
+            $message->setUserA($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(Message $message): static
+    {
+        if ($this->messages->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getUserA() === $this) {
+                $message->setUserA(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Friend>
+     */
+    public function getFriends(): Collection
+    {
+        return $this->friends;
+    }
+
+    public function addFriend(Friend $friend): static
+    {
+        if (!$this->friends->contains($friend)) {
+            $this->friends->add($friend);
+            $friend->setUserA($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFriend(Friend $friend): static
+    {
+        if ($this->friends->removeElement($friend)) {
+            // set the owning side to null (unless already changed)
+            if ($friend->getUserA() === $this) {
+                $friend->setUserA(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Achievement>
+     */
+    public function getAchievements(): Collection
+    {
+        return $this->achievements;
+    }
+
+    public function addAchievement(Achievement $achievement): static
+    {
+        if (!$this->achievements->contains($achievement)) {
+            $this->achievements->add($achievement);
+            $achievement->addPlayerID($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAchievement(Achievement $achievement): static
+    {
+        if ($this->achievements->removeElement($achievement)) {
+            $achievement->removePlayerID($this);
+        }
 
         return $this;
     }

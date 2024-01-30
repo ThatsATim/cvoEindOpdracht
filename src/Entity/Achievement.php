@@ -3,6 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\AchievementRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AchievementRepository::class)]
@@ -13,42 +16,29 @@ class Achievement
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $requirement = null;
-
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $picture = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $dateUnlocked = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $dateUnlocked = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $achievementID = null;
+    #[ORM\ManyToOne(inversedBy: 'achievements')]
+    private ?Game $gameID = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $gameID = null;
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'achievements')]
+    private Collection $playerID;
 
-    #[ORM\Column(length: 255)]
-    private ?string $playerID = null;
+    public function __construct()
+    {
+        $this->playerID = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getRequirement(): ?string
-    {
-        return $this->requirement;
-    }
-
-    public function setRequirement(string $requirement): static
-    {
-        $this->requirement = $requirement;
-
-        return $this;
     }
 
     public function getDescription(): ?string
@@ -56,7 +46,7 @@ class Achievement
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
 
@@ -68,57 +58,57 @@ class Achievement
         return $this->picture;
     }
 
-    public function setPicture(string $picture): static
+    public function setPicture(?string $picture): static
     {
         $this->picture = $picture;
 
         return $this;
     }
 
-    public function getDateUnlocked(): ?string
+    public function getDateUnlocked(): ?\DateTimeInterface
     {
         return $this->dateUnlocked;
     }
 
-    public function setDateUnlocked(string $dateUnlocked): static
+    public function setDateUnlocked(\DateTimeInterface $dateUnlocked): static
     {
         $this->dateUnlocked = $dateUnlocked;
 
         return $this;
     }
 
-    public function getAchievementID(): ?string
-    {
-        return $this->achievementID;
-    }
-
-    public function setAchievementID(string $achievementID): static
-    {
-        $this->achievementID = $achievementID;
-
-        return $this;
-    }
-
-    public function getGameID(): ?string
+    public function getGameID(): ?Game
     {
         return $this->gameID;
     }
 
-    public function setGameID(string $gameID): static
+    public function setGameID(?Game $gameID): static
     {
         $this->gameID = $gameID;
 
         return $this;
     }
 
-    public function getPlayerID(): ?string
+    /**
+     * @return Collection<int, User>
+     */
+    public function getPlayerID(): Collection
     {
         return $this->playerID;
     }
 
-    public function setPlayerID(string $playerID): static
+    public function addPlayerID(User $playerID): static
     {
-        $this->playerID = $playerID;
+        if (!$this->playerID->contains($playerID)) {
+            $this->playerID->add($playerID);
+        }
+
+        return $this;
+    }
+
+    public function removePlayerID(User $playerID): static
+    {
+        $this->playerID->removeElement($playerID);
 
         return $this;
     }
