@@ -30,10 +30,10 @@ class Game
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'gamesPlayed')]
     private Collection $players;
 
-    #[ORM\OneToMany(mappedBy: 'gameID', targetEntity: Score::class)]
+    #[ORM\OneToMany(mappedBy: 'game', targetEntity: Score::class)]
     private Collection $scores;
 
-    #[ORM\OneToMany(mappedBy: 'gameID', targetEntity: Achievement::class)]
+    #[ORM\OneToMany(mappedBy: 'game', targetEntity: Achievement::class)]
     private Collection $achievements;
 
     public function __construct()
@@ -135,7 +135,7 @@ class Game
     {
         if (!$this->scores->contains($score)) {
             $this->scores->add($score);
-            $score->setGameID($this);
+            $score->se($this);
         }
 
         return $this;
@@ -145,8 +145,8 @@ class Game
     {
         if ($this->scores->removeElement($score)) {
             // set the owning side to null (unless already changed)
-            if ($score->getGameID() === $this) {
-                $score->setGameID(null);
+            if ($score->getGame() === $this) {
+                $score->setGame(null);
             }
         }
 
@@ -165,7 +165,7 @@ class Game
     {
         if (!$this->achievements->contains($achievement)) {
             $this->achievements->add($achievement);
-            $achievement->setGameID($this);
+            $achievement->setGame($this);
         }
 
         return $this;
@@ -175,8 +175,8 @@ class Game
     {
         if ($this->achievements->removeElement($achievement)) {
             // set the owning side to null (unless already changed)
-            if ($achievement->getGameID() === $this) {
-                $achievement->setGameID(null);
+            if ($achievement->getGame() === $this) {
+                $achievement->setGame(null);
             }
         }
 

@@ -21,10 +21,10 @@ class Score
     private ?string $score = null;
 
     #[ORM\ManyToOne(inversedBy: 'scores')]
-    private ?Game $gameID = null;
+    private ?Game $game = null;
 
     #[ORM\ManyToOne(inversedBy: 'scores')]
-    private ?User $playerID = null;
+    private ?User $player = null;
 
     public function getId(): ?int
     {
@@ -55,26 +55,26 @@ class Score
         return $this;
     }
 
-    public function getGameID(): ?Game
+    public function getGame(): ?Game
     {
-        return $this->gameID;
+        return $this->game;
     }
 
-    public function setGameID(?Game $gameID): static
+    public function setGame(?Game $game): static
     {
-        $this->gameID = $gameID;
+        $this->game = $game;
 
         return $this;
     }
 
-    public function getPlayerID(): ?User
+    public function getPlayer(): ?User
     {
-        return $this->playerID;
+        return $this->player;
     }
 
-    public function setPlayerID(?User $playerID): static
+    public function setPlayer(?User $player): static
     {
-        $this->playerID = $playerID;
+        $this->player = $player;
 
         return $this;
     }

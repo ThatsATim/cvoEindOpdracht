@@ -26,14 +26,14 @@ class Achievement
     private ?\DateTimeInterface $dateUnlocked = null;
 
     #[ORM\ManyToOne(inversedBy: 'achievements')]
-    private ?Game $gameID = null;
+    private ?Game $game = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'achievements')]
-    private Collection $playerID;
+    private Collection $player;
 
     public function __construct()
     {
-        $this->playerID = new ArrayCollection();
+        $this->player = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -77,14 +77,14 @@ class Achievement
         return $this;
     }
 
-    public function getGameID(): ?Game
+    public function getGame(): ?Game
     {
-        return $this->gameID;
+        return $this->game;
     }
 
-    public function setGameID(?Game $gameID): static
+    public function setGame(?Game $game): static
     {
-        $this->gameID = $gameID;
+        $this->game = $game;
 
         return $this;
     }
@@ -92,23 +92,23 @@ class Achievement
     /**
      * @return Collection<int, User>
      */
-    public function getPlayerID(): Collection
+    public function getPlayer(): Collection
     {
-        return $this->playerID;
+        return $this->player;
     }
 
-    public function addPlayerID(User $playerID): static
+    public function addPlayer(User $player): static
     {
-        if (!$this->playerID->contains($playerID)) {
-            $this->playerID->add($playerID);
+        if (!$this->player->contains($player)) {
+            $this->player->add($player);
         }
 
         return $this;
     }
 
-    public function removePlayerID(User $playerID): static
+    public function removePlayer(User $player): static
     {
-        $this->playerID->removeElement($playerID);
+        $this->player->removeElement($player);
 
         return $this;
     }
