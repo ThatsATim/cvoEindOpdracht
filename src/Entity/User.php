@@ -54,7 +54,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Game::class, inversedBy: 'players')]
     private Collection $gamesPlayed;
 
-    #[ORM\OneToMany(mappedBy: 'playerID', targetEntity: Score::class)]
+    #[ORM\OneToMany(mappedBy: 'player', targetEntity: Score::class)]
     private Collection $scores;
 
     #[ORM\OneToMany(mappedBy: 'userA', targetEntity: Message::class)]
@@ -63,7 +63,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'userA', targetEntity: Friend::class)]
     private Collection $friends;
 
-    #[ORM\ManyToMany(targetEntity: Achievement::class, mappedBy: 'playerID')]
+    #[ORM\ManyToMany(targetEntity: Achievement::class, mappedBy: 'player')]
     private Collection $achievements;
 
     public function __construct()
@@ -265,7 +265,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->scores->contains($score)) {
             $this->scores->add($score);
-            $score->setPlayerID($this);
+            $score->setPlayer($this);
         }
 
         return $this;
@@ -275,8 +275,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->scores->removeElement($score)) {
             // set the owning side to null (unless already changed)
-            if ($score->getPlayerID() === $this) {
-                $score->setPlayerID(null);
+            if ($score->getPlayer() === $this) {
+                $score->setPlayer(null);
             }
         }
 
@@ -355,7 +355,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->achievements->contains($achievement)) {
             $this->achievements->add($achievement);
-            $achievement->addPlayerID($this);
+            $achievement->addPlayer($this);
         }
 
         return $this;
@@ -364,7 +364,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeAchievement(Achievement $achievement): static
     {
         if ($this->achievements->removeElement($achievement)) {
-            $achievement->removePlayerID($this);
+            $achievement->removePlayer($this);
         }
 
         return $this;

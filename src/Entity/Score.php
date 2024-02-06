@@ -14,8 +14,8 @@ class Score
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $time = null;
+    #[ORM\Column(length: 255)]
+    private ?\string $time = null;
 
     #[ORM\Column(length: 255)]
     private ?string $score = null;
@@ -31,12 +31,12 @@ class Score
         return $this->id;
     }
 
-    public function getTime(): ?\DateTimeInterface
+    public function getTime(): string
     {
         return $this->time;
     }
 
-    public function setTime(\DateTimeInterface $time): static
+    public function setTime(string $time): static
     {
         $this->time = $time;
 
