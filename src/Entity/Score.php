@@ -15,7 +15,7 @@ class Score
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?\string $time = null;
+    private ?string $time = null;
 
     #[ORM\Column(length: 255)]
     private ?string $score = null;
