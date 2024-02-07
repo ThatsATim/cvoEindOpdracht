@@ -32,7 +32,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $gender = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
@@ -42,16 +42,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $picture = null;
 
     #[ORM\Column]
-    private ?bool $isBanned = null;
+    private ?bool $isBanned = false;
 
     #[ORM\Column]
-    private ?bool $isAdmin = null;
+    private ?bool $isAdmin = false;
 
     #[ORM\Column]
-    private ?bool $isMuted = null;
+    private ?bool $isMuted = false;
 
     #[ORM\Column]
-    private ?bool $isFriendInviteBlocked = null;
+    private ?bool $isFriendInviteBlocked = false;
 
     #[ORM\ManyToMany(targetEntity: Game::class, inversedBy: 'players')]
     private Collection $gamesPlayed;
