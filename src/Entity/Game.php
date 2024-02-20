@@ -27,18 +27,18 @@ class Game
     #[ORM\Column]
     private ?bool $isPublic = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'gamesPlayed')]
-    private Collection $players;
-
     #[ORM\OneToMany(mappedBy: 'game', targetEntity: Score::class)]
     private Collection $scores;
 
     #[ORM\OneToMany(mappedBy: 'game', targetEntity: Achievement::class)]
     private Collection $achievements;
 
+    #[ORM\ManyToOne(inversedBy: 'games')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
+
     public function __construct()
     {
-        $this->players = new ArrayCollection();
         $this->scores = new ArrayCollection();
         $this->achievements = new ArrayCollection();
     }
@@ -84,7 +84,7 @@ class Game
         return $this;
     }
 
-    public function isIsPublic(): ?bool
+    public function isPublic(): ?bool
     {
         return $this->isPublic;
     }
@@ -92,33 +92,6 @@ class Game
     public function setIsPublic(bool $isPublic): static
     {
         $this->isPublic = $isPublic;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, User>
-     */
-    public function getPlayers(): Collection
-    {
-        return $this->players;
-    }
-
-    public function addPlayer(User $player): static
-    {
-        if (!$this->players->contains($player)) {
-            $this->players->add($player);
-            $player->addGamesPlayed($this);
-        }
-
-        return $this;
-    }
-
-    public function removePlayer(User $player): static
-    {
-        if ($this->players->removeElement($player)) {
-            $player->removeGamesPlayed($this);
-        }
 
         return $this;
     }
@@ -135,7 +108,7 @@ class Game
     {
         if (!$this->scores->contains($score)) {
             $this->scores->add($score);
-            $score->se($this);
+            $score->setGame($this);
         }
 
         return $this;
@@ -179,6 +152,18 @@ class Game
                 $achievement->setGame(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }
