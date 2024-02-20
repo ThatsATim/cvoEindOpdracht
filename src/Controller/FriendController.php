@@ -71,7 +71,7 @@ class FriendController extends AbstractController
     #[Route('/{id}', name: 'app_friend_delete', methods: ['POST'])]
     public function delete(Request $request, Friend $friend, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$friend->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $friend->getId(), $request->request->get('_token'))) {
             $entityManager->remove($friend);
             $entityManager->flush();
         }

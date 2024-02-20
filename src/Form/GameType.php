@@ -17,8 +17,7 @@ class GameType extends AbstractType
             ->add('title')
             ->add('description')
             ->add('picture')
-            ->add('isPublic')
-        ;
+            ->add('isPublic');
     }
 
     public function configureOptions(OptionsResolver $resolver): void

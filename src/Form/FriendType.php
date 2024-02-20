@@ -16,13 +16,12 @@ class FriendType extends AbstractType
         $builder
             ->add('userA', EntityType::class, [
                 'class' => User::class,
-'choice_label' => 'id',
+                'choice_label' => 'id',
             ])
             ->add('userB', EntityType::class, [
                 'class' => User::class,
-'choice_label' => 'id',
-            ])
-        ;
+                'choice_label' => 'id',
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
